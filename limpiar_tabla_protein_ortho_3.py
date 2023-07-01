@@ -1,0 +1,42 @@
+import argparse
+
+# Para parsear el archivo
+parser = argparse.ArgumentParser()
+requiredNamed = parser.add_argument_group('required named arguments')
+requiredNamed.add_argument('-f', '--file', help='table form proteinortho')
+args = parser.parse_args()
+
+# Abrir el archivo y leer las líneas
+with open(args.file, 'r') as file:
+    lineas = file.readlines()
+
+# Obtener el encabezado y eliminar las tres primeras columnas
+encabezado = lineas[0].strip().split('\t')[3:]
+
+# Imprimir el encabezado
+print('\t'.join(encabezado))
+
+# Recorrer las filas de datos
+for linea in lineas[1:]:
+    fila = linea.strip().split('\t')
+
+    # Obtener las columnas desde la columna 2 en adelante
+    columnas = fila[3:]
+    nuevas_filas = [fila]  # Lista para almacenar las filas generadas
+
+    # Recorrer las columnas y separar en caso de encontrar una coma
+    for i in range(2, len(columnas)):
+        if ',' in columnas[i]:
+            valores_sep = columnas[i].split(',')
+            nuevas_filas_temp = []  # Lista temporal para almacenar las nuevas filas generadas
+
+            for val_sep in valores_sep:
+                for nueva_fila in nuevas_filas:
+                    nueva_fila_temp = nueva_fila[:i] + [val_sep] + nueva_fila[i+1:]
+                    nuevas_filas_temp.append(nueva_fila_temp)
+
+            nuevas_filas = nuevas_filas_temp
+
+    # Imprimir todas las filas generadas
+    for nueva_fila in nuevas_filas:
+        print('\t'.join(nueva_fila))
